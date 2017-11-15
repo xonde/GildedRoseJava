@@ -7,56 +7,83 @@ class GildedRose {
         this.items = items;
     }
 
+
     public void updateQuality() {
-        for (int i = 0; i < items.length; i++) {
-            if (!items[i].name.equals("Aged Brie")
-                    && !items[i].name.equals("Backstage passes to a TAFKAL80ETC concert")) {
-                if (items[i].quality > 0) {
-                    if (!items[i].name.equals("Sulfuras, Hand of Ragnaros")) {
-                        items[i].quality = items[i].quality - 1;
-                    }
-                }
+        for (Item item : items) {
+            if (isSulfuras(item)) {
+                continue;
+            }
+
+            item.sellIn = item.sellIn - 1;
+
+            if (isAgedBrie(item)) {
+                updateBrieQuality(item);
+            } else if (isBackstagePass(item)) {
+                updateBackstagePassQuality(item);
             } else {
-                if (items[i].quality < 50) {
-                    items[i].quality = items[i].quality + 1;
-
-                    if (items[i].name.equals("Backstage passes to a TAFKAL80ETC concert")) {
-                        if (items[i].sellIn < 11) {
-                            if (items[i].quality < 50) {
-                                items[i].quality = items[i].quality + 1;
-                            }
-                        }
-
-                        if (items[i].sellIn < 6) {
-                            if (items[i].quality < 50) {
-                                items[i].quality = items[i].quality + 1;
-                            }
-                        }
-                    }
-                }
+                updateStandardItemQuality(item);
             }
 
-            if (!items[i].name.equals("Sulfuras, Hand of Ragnaros")) {
-                items[i].sellIn = items[i].sellIn - 1;
+
+        }
+    }
+
+    private void updateStandardItemQuality(Item item) {
+        decreaseQuality(item);
+        if (isExpired(item)) {
+            decreaseQuality(item);
+        }
+    }
+
+    private void updateBackstagePassQuality(Item pass) {
+        if (isExpired(pass)) {
+            pass.quality = 0;
+        } else {
+            increaseQuality(pass);
+
+            if (pass.sellIn < 10) {
+                increaseQuality(pass);
             }
 
-            if (items[i].sellIn < 0) {
-                if (!items[i].name.equals("Aged Brie")) {
-                    if (!items[i].name.equals("Backstage passes to a TAFKAL80ETC concert")) {
-                        if (items[i].quality > 0) {
-                            if (!items[i].name.equals("Sulfuras, Hand of Ragnaros")) {
-                                items[i].quality = items[i].quality - 1;
-                            }
-                        }
-                    } else {
-                        items[i].quality = items[i].quality - items[i].quality;
-                    }
-                } else {
-                    if (items[i].quality < 50) {
-                        items[i].quality = items[i].quality + 1;
-                    }
-                }
+            if (pass.sellIn < 5) {
+                increaseQuality(pass);
             }
         }
+    }
+
+    private void updateBrieQuality(Item brie) {
+        increaseQuality(brie);
+
+        if (isExpired(brie)) {
+            increaseQuality(brie);
+        }
+    }
+
+    private boolean isExpired(Item item) {
+        return item.sellIn < 0;
+    }
+
+    private void decreaseQuality(Item item) {
+        if (item.quality > 0) {
+            item.quality = item.quality - 1;
+        }
+    }
+
+    private void increaseQuality(Item item) {
+        if (item.quality < 50) {
+            item.quality = item.quality + 1;
+        }
+    }
+
+    private static boolean isAgedBrie(Item item) {
+        return item.name.equals("Aged Brie");
+    }
+
+    private static boolean isSulfuras(Item item) {
+        return item.name.equals("Sulfuras, Hand of Ragnaros");
+    }
+
+    private static boolean isBackstagePass(Item item) {
+        return item.name.equals("Backstage passes to a TAFKAL80ETC concert");
     }
 }
