@@ -17,62 +17,44 @@ class GildedRose {
             item.sellIn = item.sellIn - 1;
 
             if (isAgedBrie(item)) {
-                updateBrieQuality(item);
+                item.quality += isExpired(item) ? 2 : 1;
             } else if (isBackstagePass(item)) {
-                updateBackstagePassQuality(item);
+                item.quality = newBackstagePassQuality(item);
             } else {
-                updateStandardItemQuality(item);
+                item.quality -= isExpired(item) ? 2 : 1;
             }
 
-
+            enforceQualityRange(item);
         }
     }
 
-    private void updateStandardItemQuality(Item item) {
-        decreaseQuality(item);
-        if (isExpired(item)) {
-            decreaseQuality(item);
+    private void enforceQualityRange(Item item) {
+        if (item.quality < 0) {
+            item.quality = 0;
+        }
+        if (item.quality > 50) {
+            item.quality = 50;
         }
     }
 
-    private void updateBackstagePassQuality(Item pass) {
+    private int newBackstagePassQuality(Item pass) {
         if (isExpired(pass)) {
-            pass.quality = 0;
-        } else {
-            increaseQuality(pass);
-
-            if (pass.sellIn < 10) {
-                increaseQuality(pass);
-            }
-
-            if (pass.sellIn < 5) {
-                increaseQuality(pass);
-            }
+            return 0;
         }
-    }
 
-    private void updateBrieQuality(Item brie) {
-        increaseQuality(brie);
-
-        if (isExpired(brie)) {
-            increaseQuality(brie);
+        if (pass.sellIn < 5) {
+            return pass.quality + 3;
         }
+
+        if (pass.sellIn < 10) {
+            return pass.quality + 2;
+        }
+
+        return pass.quality + 1;
     }
 
     private boolean isExpired(Item item) {
         return item.sellIn < 0;
-    }
-
-    private void decreaseQuality(Item item) {
-        if (item.quality > 0) {
-            item.quality = item.quality - 1;
-        }
-    }
-
-    private void increaseQuality(Item item) {
-        if (item.quality < 50) {
-            item.quality = item.quality + 1;
-        }
     }
 
     private static boolean isAgedBrie(Item item) {
