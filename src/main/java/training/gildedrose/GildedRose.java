@@ -8,15 +8,16 @@ class GildedRose {
     private static final String BACKSTAGE_PASS = "Backstage passes to a TAFKAL80ETC concert";
     private static final String SULFURAS = "Sulfuras, Hand of Ragnaros";
 
-    private static final Map<String, QualityRule> QUALITY_RULES = new HashMap<>();
+    private static final Map<String, QualityRule> NAMED_ITEM_QUALITY_RULES = new HashMap<>();
 
     static {
-        QUALITY_RULES.put(AGED_BRIE, item -> item.quality + (isExpired(item) ? 2 : 1));
-        QUALITY_RULES.put(BACKSTAGE_PASS, GildedRose::newBackstagePassQuality);
-        QUALITY_RULES.put(SULFURAS, item -> item.quality);
+        NAMED_ITEM_QUALITY_RULES.put(AGED_BRIE, item -> item.quality + (isExpired(item) ? 2 : 1));
+        NAMED_ITEM_QUALITY_RULES.put(BACKSTAGE_PASS, GildedRose::newBackstagePassQuality);
+        NAMED_ITEM_QUALITY_RULES.put(SULFURAS, item -> item.quality);
     }
 
-    private static final QualityRule DEFAULT_QUALITY_RULE = item -> item.quality - (isExpired(item) ? 2 : 1);
+    private static final QualityRule STANDARD_QUALITY_RULE = item -> item.quality - (isExpired(item) ? 2 : 1);
+    private static final QualityRule CONJURED_QUALITY_RULE = item -> item.quality - (isExpired(item) ? 4 : 2);
 
     Item[] items;
 
@@ -31,11 +32,15 @@ class GildedRose {
                 item.sellIn = item.sellIn - 1;
             }
 
-            QualityRule rule = QUALITY_RULES.getOrDefault(item.name, DEFAULT_QUALITY_RULE);
+            QualityRule rule = NAMED_ITEM_QUALITY_RULES.getOrDefault(item.name, getDefaultQualityRule(item));
             item.quality = rule.newQuality(item);
 
             enforceQualityRange(item);
         }
+    }
+
+    private QualityRule getDefaultQualityRule(Item item) {
+        return item.name.startsWith("Conjured ") ? CONJURED_QUALITY_RULE : STANDARD_QUALITY_RULE;
     }
 
     private void enforceQualityRange(Item item) {

@@ -167,4 +167,31 @@ public class GildedRoseTest {
 
         assertThat(pass).hasQuality(0);
     }
+
+    @Test
+    public void conjuredItemQualityDecreasesAtDoubleRateBeforeExpiry() {
+        Item item = new Item("Conjured item", 10, 20);
+        GildedRose gildedRose = new GildedRose(new Item[]{item});
+
+        for (int i = 0; i < 5; i++) {
+            gildedRose.updateQuality();
+        }
+
+        assertThat(item).hasSellIn(5);
+        assertThat(item).hasQuality(10);
+    }
+
+    @Test
+    public void conjuredItemQualityDecreasesAtQuadrupleRateAfterExpiry() {
+        Item item = new Item("Conjured Item", 1, 20);
+
+        GildedRose gildedRose = new GildedRose(new Item[]{item});
+
+        for (int i = 0; i < 3; i++) {
+            gildedRose.updateQuality();
+        }
+
+        assertThat(item).hasSellIn(-2);
+        assertThat(item).hasQuality(10);
+    }
 }
